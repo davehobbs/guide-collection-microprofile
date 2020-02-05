@@ -40,7 +40,7 @@ guide-category: collections
 
 ## What you'll learn
 
-You'll learn how to create and run a simple cloud native microservice. Then, you'll update the microservice that you created and deploy it to Kubernetes or Knative. This process will be done by using the Eclipse MicroProfile application stack . Deployment to Knative is optional depending on whether you want to Scale to Zero.
+You'll learn how to create and run a simple cloud native microservice based on the Eclipse MicroProfile application stack. You’ll learn how to configure your development environment, update the microservice that you created and deploy it to Kubernetes or serverless. Deployment to serverless is optional depending on whether you want to Scale to Zero.
 
 The Eclipse MicroProfile application stack enables the development and optimization of microservices. With application stacks, developers don't need to manage full software development stacks or be experts on underlying container technologies or Kubernetes. Application stacks are customized for specific enterprises to incorporate their company standards and technology choices.
 
@@ -59,7 +59,7 @@ Applications in this guide are written based on the Eclipse MicroProfile API spe
 - *Optional:* If your organisation has customized application stacks, you need the URL that points to the `index.yaml` file for the stack hub.
 - *Optional*: If you are testing multiple microservices together, you must have access to a local Kubernetes cluster for local development.
 If you are using Docker Desktop, you can enable Kubernetes from the menu by selecting *Preferences* -> *Kubernetes* -> *Enable Kubernetes*.
-Other options include [Minishift](https://www.okd.io/minishift/) or [Minikube](https://kubernetes.io/docs/setup/learning-environment/minikube/).
+Other options include [Minishift](https://www.okd.io/minishift/) or [Minikube](https://kubernetes.io/docs/setup/learning-environment/minikube/). If you want to use remote cluster development, use Codewind.
 
 <!--
 // =================================================================================================
@@ -79,20 +79,20 @@ Other options include [Minishift](https://www.okd.io/minishift/) or [Minikube](h
 
 To check the repositories that you can already access, run the following command:
 
-```
+```shell
 appsody repo list
 ```
 
 You see output similar to the following example:
 
-```
+```shell
 NAME        URL
 *incubator https://github.com/appsody/stacks/releases/latest/download/incubator-index.yaml
 ```
 
 Next, run the following command to add the URL for your stack hub index file:
 
-```
+```shell
 appsody repo add <my-org-stack> <URL>
 ```
 
@@ -101,12 +101,12 @@ your stack hub index file.
 
 **Note:** If you do not have a stack hub that contains customized, pre-configured application stacks, you can skip to
 [Initializing your project](#initializing-your-project) and develop your app based on the public application stack
-for Node.js Express.
+for Eclipse MicroProfile.
 
 Check the repositories again by running `appsody repo list` to see that your stack hub was added. In the
 following examples, the stack hub is called `abc-stacks` and the URL is `https://github.com/abc.inc/stacks/index.yaml`:
 
-```
+```shell
 NAME        URL
 *incubator https://github.com/appsody/stacks/releases/latest/download/incubator-index.yaml
 abc-stacks https://github.com/abc.inc/stacks/index.yaml
@@ -115,13 +115,13 @@ abc-stacks https://github.com/abc.inc/stacks/index.yaml
 In this example, the asterisk (\*) shows that `incubator` is the default repository. Run the following command to set `abc-stacks`
 as the default repository:
 
-```
+```shell
 appsody repo set-default abc-stacks
 ```
 
 Check the available repositories again by running `appsody repo list` to see that the default is updated:
 
-```
+```shell
 NAME        URL
 incubator https://github.com/appsody/stacks/releases/latest/download/incubator-index.yaml
 *abc-stacks https://github.com/abc.inc/stacks/index.yaml
@@ -130,13 +130,13 @@ incubator https://github.com/appsody/stacks/releases/latest/download/incubator-i
 **Recommendation**: To avoid initializing projects that are based on the public application stacks, it's best
 to remove `incubator` from the list. Run the following command to remove the `incubator` repository:
 
-```
+```shell
 appsody repo remove incubator
 ```
 
 Check the available repositories again by running `appsody repo list` to see that `incubator` is removed:
 
-```
+```shell
 NAME     	URL
 *abc-stacks https://github.com/abc.inc/stacks/index.yaml
 ```
@@ -153,20 +153,20 @@ Your development environment is now configured to use your customized applicatio
 
 First, create a directory that will contain the project:
 
-```
+```shell
 mkdir -p ~/projects/simple-microprofile
 cd ~/projects/simple-microprofile
 ```
 
 Run the following command to initialize the project with the CLI:
 
-```
+```shell
 appsody init java-microprofile
 ```
 
 The output from the command varies depending on whether you have an installation of Java and Maven on your system. If Java and Maven are installed on your system, you see an output similar to the following example:
 
-```
+```shell
 [InitScript] [INFO] -------------------< dev.appsody:java-microprofile >--------------------
 [InitScript] [INFO] Building java-microprofile 0.2.11
 [InitScript] [INFO] --------------------------------[ pom ]---------------------------------
@@ -187,7 +187,7 @@ Successfully initialized Appsody project
 
 If Java and Maven are not installed on your system, you see an output similar to the following example:
 
-```
+```shell
 [InitScript] Unable to find any JVMs matching version "(null)".
 [InitScript] No Java runtime present, try --request to install.
 [InitScript] Unable to find a $JAVA_HOME at "/usr", continuing with system-provided Java...
@@ -228,13 +228,13 @@ It contains the following artifacts:
 
 Run the following command to start the development environment:
 
-```
+```shell
 appsody run
 ```
 
 The CLI launches a local Docker image that contains an Open Liberty server that hosts the microservice. After some time, you see a message similar to the following example:
 
-```
+```shell
 [Container] [INFO] [AUDIT   ] CWWKF0011I: The defaultServer server is ready to run a smarter planet. The defaultServer server started in 20.235 seconds.
 ```
 
@@ -251,7 +251,7 @@ This message indicates that the server is started and you are ready to begin dev
 <!--
 // Now you can create your business logic. The first thing to do is to add a REST endpoint. Navigate to the JAX-RS application endpoint to confirm that there are no JAX-RS resources //available. Go to the http://localhost:9080/starter URL. You see the following `HTTP 500` error that states that there are no provider or resource classes that are associated with the application:
 // 
-// ```
+// ```shell
 // Error 500: javax.servlet.ServletException: At least one provider or resource class should be specified for application class "dev.appsody.starter.StarterApplication
 // ```
 -->
@@ -259,7 +259,7 @@ Now you can create your business logic. Typically, you put your business logic i
 
 Create a `StarterResource.java` class in the `src/main/java/dev/appsody/starter` directory. Open the file, populate it with the following code, and save it:
 
-```
+```java
 package dev.appsody.starter;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -274,7 +274,7 @@ public class StarterResource {
 
 After you save, the source compiles and the application updates. You see messages similar to the following example:
 
-```
+```shell
 [Container] [INFO] [AUDIT   ] CWWKT0017I: Web application removed (default_host): http://85862d8696be:9080/
 [Container] [INFO] [AUDIT   ] CWWKZ0009I: The application starter-app has stopped successfully.
 [Container] [INFO] [AUDIT   ] CWWKT0016I: Web application available (default_host): http://85862d8696be:9080/
@@ -283,7 +283,7 @@ After you save, the source compiles and the application updates. You see message
 
 The resource that you just added is available at the `starter/resource` URL path. Go to the http://localhost:9080/starter/resource URL to see the following resource response:
 
-```
+```shell
 StarterResource response
 ```
 
@@ -317,24 +317,24 @@ After you finish writing your application code, the Appsody CLI makes it easy to
 
 Ensure that your `kubectl` command is configured with cluster details, and run the following command to deploy your application:
 
-```
+```shell
 appsody deploy
 ```
 
 This command builds a new Docker image that is optimized for production deployment and deploys the image to your local Kubernetes cluster. After some time you see a message similar to the following example:
 
-```
+```shell
 Deployed project running at http://localhost:30262
 ```
 
 Run the following command to check the status of the application pods:
-```
+```shell
 kubectl get pods
 ```
 
 You see an output similar to the following example:
 
-```
+```shell
 NAME                                  READY    STATUS   RESTARTS   AGE
 appsody-operator-859b97bb98-htpgw      1/1     Running   0         3m2s
 simple-microprofile-77d6868765-xkcpk   1/1     Running   0         31s
@@ -342,7 +342,7 @@ simple-microprofile-77d6868765-xkcpk   1/1     Running   0         31s
 
 The pod that is related to your deployed application is similar to the following pod:
 
-```
+```shell
 simple-microprofile-77d6868765-xkcpk   1/1     Running   0         31s
 ```
 
@@ -350,25 +350,25 @@ After the `simple-microprofile` pod starts, go to the URL that was returned afte
 
 Use the following command to stop the deployed application:
 
-```
+```shell
 appsody deploy delete
 ```
 
 After you run this command, and the deployment is deleted, you see the following message:
 
-```
+```shell
 Deployment deleted
 ```
 
 <!--
 // =================================================================================================
-// Testing with Knative Serving
+// Testing with serverless
 // =================================================================================================
---> 
+-->
 
-### Testing with Knative serving
+### Testing with serverless
 
-You can choose to test an application that is deployed with Knative Serving to take advantage of Scale to Zero. Not all applications can be written to effectively take advantage of Scale to Zero. The Kabanero operator-based installation configures Knative on the Kubernetes cluster. Because of the resources that are required to run Knative and its dependencies, testing locally can be difficult. Publish to Kubernetes by using pipelines that are described later in the guide. Your operations team can configure the pipelines so that Knative Serving is enabled for deployment.
+You can choose to test an application that is deployed with serverless to take advantage of Scale to Zero. Not all applications can be written to effectively take advantage of Scale to Zero. The Kabanero operator-based installation configures serverless on the Kubernetes cluster. Because of the resources that are required to run serverless and its dependencies, testing locally can be difficult. Publish to Kubernetes by using pipelines that are described later in the guide. Your operations team can configure the pipelines so that serverless is enabled for deployment.
 
 <!--
 // =================================================================================================
